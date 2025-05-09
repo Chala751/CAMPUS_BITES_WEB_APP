@@ -42,10 +42,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     header("Location: ../students/student_home.php");
                     break;
                 case 'delivery':
-                    header("Location: ../managers/home.html");
+                    header("Location: ../delivery/delivery_dashboard.php");
+                   
                     break;
                 case 'manager':
-                    header("Location: ../delivery/delivery_home.php");
+                     header("Location: ../managers/manager_order.php");
                     break;
                 default:
                     // Fallback for unrecognized roles

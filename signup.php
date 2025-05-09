@@ -11,7 +11,7 @@ $errorMessage = !empty($_SESSION['error']) ? $_SESSION['error'] : '';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign up</title>
     <link rel="stylesheet" href="signup.css">
-    <!-- <style>
+    <style>
         /* Modal styles */
         #error-modal.modal {
             display: none;
@@ -64,6 +64,20 @@ $errorMessage = !empty($_SESSION['error']) ? $_SESSION['error'] : '';
             color: #4CAF50;
             border: 1px solid #4CAF50;
         }
+        /* Responsive design for modal */
+        @media (max-width: 600px) {
+            .modal-content {
+                width: 90%;
+                padding: 15px;
+            }
+            .modal-content p {
+                font-size: 14px;
+            }
+            .modal-content button {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
         /* Dropdown styles */
         .form-group select {
             width: 100%;
@@ -74,7 +88,7 @@ $errorMessage = !empty($_SESSION['error']) ? $_SESSION['error'] : '';
             font-size: 16px;
             box-sizing: border-box;
         }
-    </style> -->
+    </style>
 </head>
 <body>
     <div class="signup-container">
@@ -88,7 +102,7 @@ $errorMessage = !empty($_SESSION['error']) ? $_SESSION['error'] : '';
         <?php 
             unset($_SESSION['error']); // Clear error to prevent re-display
         endif; ?>
-        <img src="../images/icon.png" alt="App Icon" class="logo">
+        <img src="images/icon.png" alt="App Icon" class="logo">
         <h1 class="signup-text">Sign Up</h1>
         <p class="subtitle">Please fill the form to join us</p>
         
@@ -97,7 +111,7 @@ $errorMessage = !empty($_SESSION['error']) ? $_SESSION['error'] : '';
                 <input type="text" id="username" name="username" class="text-input" placeholder="User name" required>
             </div>
             <div class="form-group">
-                <input type="email" id="email" name="email" class="text-input" placeholder=" Enter Email" required>
+                <input type="email" id="email" name="email" class="text-input" placeholder="Enter Email" required>
             </div>
             <div class="form-group">
                 <input type="password" id="password" name="password" class="text-input" placeholder="Password" minlength="6" required>
@@ -132,6 +146,14 @@ $errorMessage = !empty($_SESSION['error']) ? $_SESSION['error'] : '';
                     }, 300); // Match transition duration
                 }
             }
+
+            // Ensure modal is displayed if active
+            window.onload = function() {
+                const modal = document.getElementById('error-modal');
+                if (modal && modal.classList.contains('active')) {
+                    modal.style.display = 'flex';
+                }
+            };
         </script>
     <?php endif; ?>
 </body>

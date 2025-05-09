@@ -3,8 +3,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Include controller for order processing
-require_once 'student_controller.php';
+// Include database connection
+require_once '../php/db.php';
 
 // Check if user is signed in
 if (!isset($_SESSION['user_id'])) {
@@ -13,123 +13,71 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Sample food list (hardcoded as fallback if no posts are available)
-$default_foods = [
-    [
-        'id' => 1,
-        'title' => 'Egg Sliced',
-        'description' => 'Classic Egg Siced with ingredients',
-        'price' => 120,
-        'image_path' => 'images/food/egg-firfir.jpg'
-    ],
-    [
-        'id' => 2,
-        'title' => 'Normal Firfir',
-        'description' => 'Normal Firfir with Injera',
-        'price' => 140,
-        'image_path' => 'images/food/firfir.jpg'
-    ],
-    [
-        'id' => 3,
-        'title' => 'Keysir',
-        'description' => 'Traditional Ethiopian Food',
-        'price' => 180,
-        'image_path' => 'images/food/keysir.jpg'
-    ],
-    [
-        'id' => 4,
-        'title' => 'Shiro Wot',
-        'description' => 'Home Made Shiro Feses',
-        'price' => 90,
-        'image_path' => 'images/food/shiro.jpg'
-    ],
-    [
-        'id' => 5,
-        'title' => 'Meat Wot',
-        'description' => 'Delicious Red Meat Wot',
-        'price' => 100,
-        'image_path' => 'images/food/meat.jpg'
-    ],
-    [
-        'id' => 6,
-        'title' => 'Beyaynetu',
-        'description' => 'Mixed Ethipian Foods',
-        'price' => 130,
-        'image_path' => 'images/food/mixed.jpg'
-    ],
-    [
-        'id' => 7,
-        'title' => 'Tibs',
-        'description' => 'Grilled Ethiopian Meat.',
-        'price' => 200,
-        'image_path' => 'images/food/shekla-tibs.jpg'
-    ],
-    [
-        'id' => 8,
-        'title' => 'Gomen Wot',
-        'description' => 'Simple and filling Gomen Wot',
-        'price' => 80,
-        'image_path' => '../images/food/gomen.jpg'
-    ],
-    [
-        'id' => 9,
-        'title' => 'Chechebsa',
-        'description' => 'Traditional Ethiopian food called Chechebsa',
-        'price' => 100,
-        'image_path' => '../images/food/chechebsa.jpg'
-    ],
-    [
-        'id' => 10,
-        'title' => 'Firfir',
-        'description' => 'Firfir with yellowish erd flavour',
-        'price' => 100,
-        'image_path' => '../images/food/firfir2.jpg'
-    ],
-    [
-        'id' => 11,
-        'title' => 'Chocolate Cake',
-        'description' => 'Decadent chocolate cake with creamy frosting.',
-        'price' => 150, // Add price for Chocolate Cake
-        'image_path' => 'images/food/chocolate-cake.jpg'
-    ]
-];
+// Fetch user details
+$user_id = $_SESSION['user_id'];
+$sql = "SELECT username, email FROM users WHERE id = :id";
+$stmt = $pdo->prepare($sql);
+$stmt->execute(['id' => $user_id]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Validate and sanitize $posts to ensure all required keys exist
-$foods = [];
-if (!empty($posts)) {
-    foreach ($posts as $post) {
-        // Ensure all required keys exist, use defaults if missing
-        $foods[] = [
-            'id' => isset($post['id']) ? $post['id'] : uniqid(), // Generate ID if missing
-            'title' => isset($post['title']) ? $post['title'] : 'Unnamed Food',
-            'description' => isset($post['description']) ? $post['description'] : 'No description available',
-            'price' => isset($post['price']) ? (float)$post['price'] : 0.00, // Default to 0 if price missing
-            'image_path' => isset($post['image_path']) ? $post['image_path'] : 'images/food/default.jpg' // Default image
-        ];
-    }
-} else {
-    $foods = $default_foods;
+if (!$user) {
+    $_SESSION['error'] = "User not found.";
+    header("Location: ../login.php");
+    exit();
 }
+
+// Fetch food posts from the database
+$sql = "SELECT * FROM food_posts ORDER BY created_at DESC";
+$stmt = $pdo->prepare($sql);
+$stmt->execute();
+$foods = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Handle order submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
     $selected_items = json_decode($_POST['selected_items'], true);
-    $dorm_block = $_POST['dorm_block'];
-    $room_number = $_POST['room_number'];
-    $total = $_POST['total'];
+    $dorm_block = trim($_POST['dorm_block']);
+    $room_number = trim($_POST['room_number']);
+    $total = floatval($_POST['total']);
 
     if (empty($selected_items)) {
         $_SESSION['error'] = "Please select at least one food item.";
     } elseif (empty($dorm_block) || empty($room_number)) {
         $_SESSION['error'] = "Please provide dorm block and room number.";
     } else {
-        // Simulate order processing (replace with actual controller logic)
-        $_SESSION['status'] = [
-            'type' => 'success',
-            'msg' => 'Order placed successfully! You will receive a confirmation soon.'
-        ];
-        header("Location: order.php");
-        exit();
+        try {
+            // Begin transaction to ensure data consistency
+            $pdo->beginTransaction();
+
+            // Insert an order for each selected item
+            foreach ($selected_items as $item) {
+                $sql = "INSERT INTO orders (student_id, food_post_id, username, email, total, dorm_block, room_number, status, created_at) 
+                        VALUES (:student_id, :food_post_id, :username, :email, :total, :dorm_block, :room_number, 'Pending', CURRENT_TIMESTAMP)";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
+                    'student_id' => $user_id,
+                    'food_post_id' => $item['id'],
+                    'username' => $user['username'],
+                    'email' => $user['email'],
+                    'total' => $item['price'], // Total for this item
+                    'dorm_block' => $dorm_block,
+                    'room_number' => $room_number
+                ]);
+            }
+
+            // Commit transaction
+            $pdo->commit();
+
+            $_SESSION['status'] = [
+                'type' => 'success',
+                'msg' => 'Order placed successfully! You will receive a confirmation soon.'
+            ];
+            header("Location: order.php");
+            exit();
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            error_log("Failed to place order: " . $e->getMessage());
+            $_SESSION['error'] = "Failed to place order. Please try again.";
+        }
     }
 }
 ?>
@@ -140,6 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Order Food</title>
+    <link rel="stylesheet" href="../signup.css">
     <style>
         * {
             margin: 0;
@@ -348,9 +297,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             cursor: pointer;
             text-decoration: none;
         }
+
+        /* Modal styles */
+        #error-modal.modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            overflow: auto;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #error-modal.modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: #ffffff;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content p {
+            margin: 0;
+            padding: 10px 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .modal-content button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .modal-content button:hover {
+            background-color: white;
+            color: #4CAF50;
+            border: 1px solid #4CAF50;
+        }
+
+        /* Responsive design for modal */
+        @media (max-width: 600px) {
+            .modal-content {
+                width: 90%;
+                padding: 15px;
+            }
+            .modal-content p {
+                font-size: 14px;
+            }
+            .modal-content button {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
+    
     <section class="first-section">
         <header>
             <nav>
@@ -358,8 +381,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                     <img class="logo" src="../images/icon.png" alt="Campus Bite Logo">
                 </div>
                 <div class="nav-elements" id="nav-elements">
-                    <h1><a href="../home/home.php">Home</a></h1>
-                    <h1><a href="./order.php">Order</a></h1>
+                    <h1><a href="student_home.php">Home</a></h1>
+                    <h1><a href="order.php">Order</a></h1>
                     <h1><a href="../contact/contact.html">Contact</a></h1>
                 </div>
                 <div>
@@ -370,29 +393,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
         <section class="order">
             <div class="order-container">
                 <?php if (!empty($_SESSION['status'])): ?>
-                    <div class="alert alert-<?php echo $_SESSION['status']['type']; ?>">
-                        <?php echo $_SESSION['status']['msg']; unset($_SESSION['status']); ?>
+                    <div class="alert alert-<?php echo htmlspecialchars($_SESSION['status']['type']); ?>">
+                        <?php echo htmlspecialchars($_SESSION['status']['msg']); unset($_SESSION['status']); ?>
                     </div>
                 <?php endif; ?>
                 <?php if (!empty($_SESSION['error'])): ?>
-                    <div class="alert alert-danger">
-                        <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
+                    <div class="modal active" id="error-modal">
+                        <div class="modal-content">
+                            <p><?php echo htmlspecialchars($_SESSION['error']); ?></p>
+                            <button onclick="closeModal()">Close</button>
+                        </div>
                     </div>
-                <?php endif; ?>
+                <?php unset($_SESSION['error']); endif; ?>
                 <h1 class="order-title">Select Food</h1>
                 <div class="food-list" id="food-list">
-                    <?php foreach ($foods as $food): ?>
-                        <div class="food-item" 
-                             data-id="<?php echo htmlspecialchars($food['id']); ?>" 
-                             data-title="<?php echo htmlspecialchars($food['title']); ?>" 
-                             data-price="<?php echo htmlspecialchars($food['price']); ?>">
-                            <img src="/CAMPUS_BITES_WEB_APP/<?php echo htmlspecialchars($food['image_path']); ?>" 
-                                 alt="<?php echo htmlspecialchars($food['title']); ?>">
-                            <h3><?php echo htmlspecialchars($food['title']); ?></h3>
-                            <p class="desc"><?php echo htmlspecialchars($food['description']); ?></p>
-                            <p class="price">ብር <?php echo number_format($food['price'], 2); ?></p>
-                        </div>
-                    <?php endforeach; ?>
+                    <?php if (empty($foods)): ?>
+                        <p>No food items available.</p>
+                    <?php else: ?>
+                        <?php foreach ($foods as $food): ?>
+                            <div class="food-item" 
+                                 data-id="<?php echo htmlspecialchars($food['id']); ?>" 
+                                 data-title="<?php echo htmlspecialchars($food['title']); ?>" 
+                                 data-price="<?php echo htmlspecialchars($food['price']); ?>">
+                                <img src="/CAMPUS_BITES_WEB_AP/<?php echo htmlspecialchars($food['image_path']); ?>" 
+                                     alt="<?php echo htmlspecialchars($food['title']); ?>">
+                                <h3><?php echo htmlspecialchars($food['title']); ?></h3>
+                                <p class="desc"><?php echo htmlspecialchars($food['description']); ?></p>
+                                <p class="price">ብር <?php echo number_format($food['price'], 2); ?></p>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
                 <div class="selected-items" id="selected-items"></div>
                 <div class="order-summary">
@@ -408,7 +438,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                     </div>
                     <div class="input-group">
                         <label for="room">Room Number</label>
-                        <input type="number" id="room" name="room_number" placeholder="Enter room number" required />
+                        <input type="text" id="room" name="room_number" placeholder="Enter room number" required />
                     </div>
                     <button type="submit" name="place_order" class="place-order-btn" id="place-order-btn">Place Order</button>
                 </form>
@@ -444,7 +474,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
 
         unselectBtn.addEventListener('click', () => {
             selectedItems = [];
-            foodItems.forEach(item => item.ConcurrentModificationException.classList.remove('selected'));
+            foodItems.forEach(item => item.classList.remove('selected'));
             updateSelectedItems();
         });
 
@@ -461,6 +491,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             selectedItemsInput.value = JSON.stringify(selectedItems);
             totalInput.value = total.toFixed(2);
         }
+
+        function closeModal() {
+            const modal = document.getElementById('error-modal');
+            if (modal) {
+                modal.classList.remove('active');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300); // Match transition duration
+            }
+        }
+
+        // Ensure modal is displayed if active
+        window.onload = function() {
+            const modal = document.getElementById('error-modal');
+            if (modal && modal.classList.contains('active')) {
+                modal.style.display = 'flex';
+            }
+        };
     </script>
 </body>
 </html>

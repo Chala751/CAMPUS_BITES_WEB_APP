@@ -2,9 +2,8 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-require_once 'student_controller.php'; // Include controller
+require_once 'student_controller.php';
 
-// Check if user is signed in before processing order
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order'])) {
     if (!isset($_SESSION['user_id'])) {
         $_SESSION['error'] = "Please sign in to place an order.";
@@ -57,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order'])) {
         }
 
         .section-0 {
-            background-image: url('../../images/grab-W_UiSLqthaU-unsplash.jpg');
+            background-image: url('../images/grab-W_UiSLqthaU-unsplash.jpg');
             background-attachment: fixed;
             background-size: cover;
             background-position: center;
@@ -750,14 +749,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order'])) {
                 </div>
                 <div class="nav-elements">
                     <ul>
-                        <li><a href="../home/home.html">Home</a></li>
+                        <li><a href="student_home.php">Home</a></li>
                         <li><a href="order.php">Order</a></li>
-                        <li><a href="../about/about.html">About Us</a></li>
+                        
                     </ul>
                 </div>
-                <div>
-                    <img class="sign-log" src="./images/user (2).png" alt="">
-                </div>
+              
             </nav>
         </header>
         <section class="section-1">
@@ -781,13 +778,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order'])) {
                     <input type="radio" name="radio-btn" id="img2">
                     <input type="radio" name="radio-btn" id="img3">
                     <div class="slide s1">
-                        <img src="../../images/Recipes/ella-olsson-kKLRvcjQNqM-unsplash.jpg" alt="">
+                        <img src="../images/Recipes/ella-olsson-kKLRvcjQNqM-unsplash.jpg" alt="">
                     </div>
                     <div class="slide">
-                        <img src="../../images/Recipes/gebiya-putri-IzdLRdXcNT8-unsplash.jpg" alt="">
+                        <img src="../images/Recipes/gebiya-putri-IzdLRdXcNT8-unsplash.jpg" alt="">
                     </div>
                     <div class="slide">
-                        <img src="../../images/Recipes/s-o-c-i-a-l-c-u-t-hwy3W3qFjgM-unsplash.jpg" alt="">
+                        <img src="../images/Recipes/s-o-c-i-a-l-c-u-t-hwy3W3qFjgM-unsplash.jpg" alt="">
                     </div>
                     <div class="navigation-manual">
                         <label for="img1" class="manual-btn"></label>
@@ -922,9 +919,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order'])) {
     <section class="extras">
         <h3>What else we can offer you</h3>
         <div class="extras-items">
-            <div><img src="../../images/Recipes/ella-olsson-kKLRvcjQNqM-unsplash.jpg"><p>Recipes</p></div>
-            <div><img src="../../images/Recipes/gebiya-putri-IzdLRdXcNT8-unsplash.jpg"><p>Home workouts</p></div>
-            <div><img src="../../images/Recipes/s-o-c-i-a-l-c-u-t-hwy3W3qFjgM-unsplash.jpg"><p>Accessories</p></div>
+            <div><img src="../images/Recipes/ella-olsson-kKLRvcjQNqM-unsplash.jpg"><p>Recipes</p></div>
+            <div><img src="../images/Recipes/gebiya-putri-IzdLRdXcNT8-unsplash.jpg"><p>Home workouts</p></div>
+            <div><img src="../images/Recipes/s-o-c-i-a-l-c-u-t-hwy3W3qFjgM-unsplash.jpg"><p>Accessories</p></div>
         </div>
     </section>
     <footer class="footer">
@@ -951,9 +948,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order'])) {
             <div class="footer-col">
                 <h3>Follow Us</h3>
                 <div class="social-icons">
-                    <a href="#"><img src="../../icons/socials/facebook (1).png" alt="Facebook"></a>
-                    <a href="#"><img src="../../icons/socials/twitter.png" alt="Twitter"></a>
-                    <a href="#"><img src="../../icons/socials/instagram.png" alt="Instagram"></a>
+                    <a href="#"><img src="../icons/socials/facebook (1).png" alt="Facebook"></a>
+                    <a href="#"><img src="../icons/socials/twitter.png" alt="Twitter"></a>
+                    <a href="#"><img src="../icons/socials/instagram.png" alt="Instagram"></a>
                 </div>
             </div>
         </div>

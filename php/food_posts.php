@@ -6,12 +6,19 @@ require_once 'db.php';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = trim($_POST['title']);
     $description = trim($_POST['description']);
+    $price = trim($_POST['price']);
     $image = $_FILES['image'];
 
     // Validate inputs
-    if (empty($title) || empty($image['name'])) {
-        $_SESSION['status'] = ['type' => 'error', 'msg' => 'Title and image are required.'];
-        header('Location: ../pages/managers/food_post.php');
+    if (empty($title) || empty($image['name']) || empty($price)) {
+        $_SESSION['error'] = 'Title, image, and price are required.';
+        header('Location: ../managers/food_post.php');
+        exit;
+    }
+
+    if (!is_numeric($price) || $price <= 0) {
+        $_SESSION['error'] = 'Price must be a positive number.';
+        header('Location: ../managers/food_post.php');
         exit;
     }
 
@@ -19,24 +26,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $uploadDir = '../Uploads/';
     if (!is_dir($uploadDir)) {
         if (!mkdir($uploadDir, 0755, true)) {
-            $_SESSION['status'] = ['type' => 'error', 'msg' => 'Failed to create Uploads directory.'];
-            header('Location: ../pages/managers/food_post.php');
+            $_SESSION['error'] = 'Failed to create Uploads directory.';
+            header('Location: ../managers/food_post.php');
             exit;
         }
     }
-    $imagePath = 'Uploads/' . basename($image['name']); // Store path relative to project root
-    $fullPath = $uploadDir . basename($image['name']); // Full path for file system
+    $imagePath = 'Uploads/' . basename($image['name']);
+    $fullPath = $uploadDir . basename($image['name']);
     $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
 
     if (!in_array($image['type'], $allowedTypes)) {
-        $_SESSION['status'] = ['type' => 'error', 'msg' => 'Invalid image format. Only JPEG, PNG, or GIF allowed.'];
-        header('Location: ../pages/managers/food_post.php');
+        $_SESSION['error'] = 'Invalid image format. Only JPEG, PNG, or GIF allowed.';
+        header('Location: ../managers/food_post.php');
         exit;
     }
 
     if (!move_uploaded_file($image['tmp_name'], $fullPath)) {
-        $_SESSION['status'] = ['type' => 'error', 'msg' => 'Failed to upload image. Check directory permissions.'];
-        header('Location: ../pages/managers/food_post.php');
+        $_SESSION['error'] = 'Failed to upload image. Check directory permissions.';
+        header('Location: ../managers/food_post.php');
         exit;
     }
 
@@ -47,27 +54,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['post_id']) && !empty($_POST['post_id'])) {
         // Update existing post
         $postId = $_POST['post_id'];
-        $sql = "UPDATE food_posts SET title = :title, description = :description, image_path = :image_path WHERE id = :id";
+        $sql = "UPDATE food_posts SET title = :title, description = :description, price = :price, image_path = :image_path WHERE id = :id";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
             'title' => $title,
             'description' => $description,
+            'price' => $price,
             'image_path' => $imagePath,
             'id' => $postId
         ]);
         $_SESSION['status'] = ['type' => 'success', 'msg' => 'Post updated successfully.'];
     } else {
         // Create new post
-        $sql = "INSERT INTO food_posts (title, description, image_path) VALUES (:title, :description, :image_path)";
+        $sql = "INSERT INTO food_posts (title, description, price, image_path) VALUES (:title, :description, :price, :image_path)";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
             'title' => $title,
             'description' => $description,
+            'price' => $price,
             'image_path' => $imagePath
         ]);
         $_SESSION['status'] = ['type' => 'success', 'msg' => 'Post created successfully.'];
     }
-    header('Location: ../pages/managers/food_post.php');
+    header('Location: ../managers/food_post.php');
     exit;
 }
 
@@ -89,7 +98,7 @@ if (isset($_GET['delete'])) {
     $stmt = $pdo->prepare($sql);
     $stmt->execute(['id' => $postId]);
     $_SESSION['status'] = ['type' => 'success', 'msg' => 'Post deleted successfully.'];
-    header('Location: ../pages/managers/food_post.php');
+    header('Location: ../managers/food_post.php');
     exit;
 }
 
@@ -98,4 +107,3 @@ $sql = "SELECT * FROM food_posts ORDER BY created_at DESC";
 $stmt = $pdo->prepare($sql);
 $stmt->execute();
 $posts = $stmt->fetchAll();
-?>

@@ -4,7 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once '../../php/db.php';
+require_once '../php/db.php';
 
 // Fetch all food posts
 function getFoodPosts($pdo) {
