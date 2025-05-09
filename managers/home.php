@@ -1,20 +1,14 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 require_once '../php/db.php';
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'manager') {
     $_SESSION['error'] = "You must be a manager to access this page.";
-    header("Location: ../../login.php");
+    header("Location: ../login.php");
     exit();
-}
-
-$post = null;
-if (isset($_GET['edit'])) {
-    $postId = $_GET['edit'];
-    $sql = "SELECT * FROM food_posts WHERE id = :id";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute(['id' => $postId]);
-    $post = $stmt->fetch(PDO::FETCH_ASSOC);
 }
 ?>
 
@@ -23,7 +17,7 @@ if (isset($_GET['edit'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $post ? 'Edit Food Post' : 'Create Food Post'; ?></title>
+    <title>Manager - Campus Bites</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     <style>
@@ -35,6 +29,7 @@ if (isset($_GET['edit'])) {
             --dark-brown: #8b3a0e;
             --black: #121212;
             --white: #ffffff;
+            --light-cream: #e6d4b5;
             --container-width: 1200px;
         }
 
@@ -115,7 +110,7 @@ if (isset($_GET['edit'])) {
             cursor: pointer;
         }
 
-        .form-section {
+        .home-section {
             flex: 1;
             display: flex;
             justify-content: center;
@@ -123,14 +118,15 @@ if (isset($_GET['edit'])) {
             padding: 2rem;
         }
 
-        .form-container {
+        .home-container {
             background: var(--brown);
             padding: 2rem;
             border-radius: 15px;
             width: 100%;
-            max-width: 600px;
+            max-width: var(--container-width);
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
             animation: fadeIn 0.5s ease-in;
+            text-align: center;
         }
 
         @keyframes fadeIn {
@@ -138,82 +134,54 @@ if (isset($_GET['edit'])) {
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .form-title {
-            font-size: 2rem;
+        .home-title {
+            font-size: 2.5rem;
             font-weight: 700;
             color: var(--cream);
-            margin-bottom: 1.5rem;
-            text-align: center;
+            margin-bottom: 1rem;
         }
 
-        .form-group {
-            margin-bottom: 1.5rem;
+        .home-subtitle {
+            font-size: 1.2rem;
+            color: var(--light-cream);
+            margin-bottom: 2rem;
         }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--cream);
-            font-size: 1rem;
-            font-weight: 500;
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
 
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--dark-brown);
+        .link-card {
+            background: var(--dark-brown);
+            padding: 1.5rem;
             border-radius: 10px;
-            background: var(--cream);
-            color: var(--black);
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            border-color: var(--primary-green);
-            outline: none;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .form-group input[type="file"] {
-            padding: 0.2rem;
-            background: none;
-            border: none;
-        }
-
-        .form-group .current-image {
-            margin-top: 0.5rem;
-            color: var(--cream);
-        }
-
-        .form-group .current-image img {
-            max-width: 100px;
-            border-radius: 8px;
-            margin-top: 0.5rem;
-        }
-
-        .submit-btn {
-            background: var(--primary-green);
-            color: var(--white);
-            padding: 1rem;
-            width: 100%;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: 600;
+            transition: transform 0.3s, box-shadow 0.3s;
             cursor: pointer;
-            transition: background 0.3s, transform 0.2s;
         }
 
-        .submit-btn:hover {
-            background: var(--dark-green);
-            transform: translateY(-2px);
+        .link-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .link-card i {
+            font-size: 2rem;
+            color: var(--primary-green);
+            margin-bottom: 0.5rem;
+        }
+
+        .link-card h3 {
+            font-size: 1.25rem;
+            color: var(--cream);
+            margin-bottom: 0.5rem;
+        }
+
+        .link-card p {
+            font-size: 0.9rem;
+            color: var(--light-cream);
         }
 
         .alert {
@@ -233,7 +201,7 @@ if (isset($_GET['edit'])) {
             color: #155724;
         }
 
-        .alert-error {
+        .alert-danger {
             background: #f8d7da;
             color: #721c24;
         }
@@ -299,19 +267,20 @@ if (isset($_GET['edit'])) {
 
         /* Responsive Design */
         @media (max-width: 1024px) {
-            .form-container {
+            .home-container {
                 padding: 1.5rem;
-                max-width: 500px;
             }
 
-            .form-title {
-                font-size: 1.75rem;
+            .home-title {
+                font-size: 2rem;
             }
 
-            .form-group label,
-            .form-group input,
-            .form-group textarea {
-                font-size: 0.95rem;
+            .home-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .quick-links {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             }
         }
 
@@ -344,28 +313,24 @@ if (isset($_GET['edit'])) {
                 to { opacity: 1; transform: translateY(0); }
             }
 
-            .form-section {
+            .home-section {
                 padding: 1rem;
             }
 
-            .form-container {
+            .home-container {
                 width: 95%;
-                padding: 1.5rem;
             }
 
-            .form-title {
-                font-size: 1.5rem;
+            .home-title {
+                font-size: 1.75rem;
             }
 
-            .form-group label,
-            .form-group input,
-            .form-group textarea {
-                font-size: 0.9rem;
-            }
-
-            .submit-btn {
+            .home-subtitle {
                 font-size: 1rem;
-                padding: 0.75rem;
+            }
+
+            .quick-links {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -379,27 +344,20 @@ if (isset($_GET['edit'])) {
                 padding: 0.5rem;
             }
 
-            .form-container {
-                padding: 1rem;
+            .home-title {
+                font-size: 1.5rem;
             }
 
-            .form-title {
-                font-size: 1.25rem;
-            }
-
-            .form-group label,
-            .form-group input,
-            .form-group textarea {
-                font-size: 0.85rem;
-            }
-
-            .form-group .current-image img {
-                max-width: 80px;
-            }
-
-            .submit-btn {
+            .home-subtitle {
                 font-size: 0.9rem;
-                padding: 0.75rem;
+            }
+
+            .link-card h3 {
+                font-size: 1.1rem;
+            }
+
+            .link-card p {
+                font-size: 0.85rem;
             }
 
             .modal-content {
@@ -427,15 +385,15 @@ if (isset($_GET['edit'])) {
                 </div>
                 <i class="fas fa-bars hamburger" id="hamburger"></i>
                 <div class="nav-elements" id="nav-elements">
-                    <a href="./home.php">Home</a>
-                    <a href="./food_post.php" class="active">Manage Food</a>
-                    <a href="./manager_order.php">Orders</a>
+                    <a href="home.php" class="active">Home</a>
+                    <a href="../managers/food_post.php">Manage Food</a>
+                    <a href="../managers/manager_order.php">Orders</a>
                     <a href="../managers/contact.php">Contact</a>
                 </div>
             </nav>
         </header>
-        <section class="form-section">
-            <div class="form-container">
+        <section class="home-section">
+            <div class="home-container">
                 <?php if (!empty($_SESSION['status'])): ?>
                     <div class="alert alert-<?php echo htmlspecialchars($_SESSION['status']['type']); ?>">
                         <i class="fas fa-<?php echo $_SESSION['status']['type'] === 'success' ? 'check-circle' : 'exclamation-circle'; ?>"></i>
@@ -450,35 +408,25 @@ if (isset($_GET['edit'])) {
                         </div>
                     </div>
                 <?php unset($_SESSION['error']); endif; ?>
-                <h1 class="form-title"><?php echo $post ? 'Edit Food Post' : 'Create Food Post'; ?></h1>
-                <form action="../php/food_posts.php" method="POST" enctype="multipart/form-data">
-                    <?php if ($post): ?>
-                        <input type="hidden" name="post_id" value="<?php echo htmlspecialchars($post['id']); ?>">
-                    <?php endif; ?>
-                    <div class="form-group">
-                        <label for="title">Title</label>
-                        <input type="text" id="title" name="title" value="<?php echo $post ? htmlspecialchars($post['title']) : ''; ?>" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="description">Description</label>
-                        <textarea id="description" name="description" rows="4"><?php echo $post ? htmlspecialchars($post['description']) : ''; ?></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="price">Price (ብር)</label>
-                        <input type="number" id="price" name="price" step="0.01" min="0" value="<?php echo $post ? htmlspecialchars($post['price']) : ''; ?>" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="image">Image</label>
-                        <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/gif" <?php echo $post ? '' : 'required'; ?>>
-                        <?php if ($post && $post['image_path']): ?>
-                            <div class="current-image">
-                                <p>Current Image:</p>
-                                <img src="/CAMPUS_BITES_WEB_APP/<?php echo htmlspecialchars($post['image_path']); ?>" alt="Current Image">
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                    <button type="submit" class="submit-btn"><?php echo $post ? 'Update Post' : 'Create Post'; ?></button>
-                </form>
+                <h1 class="home-title">Welcome, Manager!</h1>
+                <p class="home-subtitle">Manage your food posts and orders efficiently with Campus Bites.</p>
+                <div class="quick-links">
+                    <a href="../managers/food_post.php" class="link-card">
+                        <i class="fas fa-utensils"></i>
+                        <h3>Manage Food</h3>
+                        <p>Create or edit food posts to keep your menu updated.</p>
+                    </a>
+                    <a href="../managers/manager_order.php" class="link-card">
+                        <i class="fas fa-shopping-cart"></i>
+                        <h3>View Orders</h3>
+                        <p>Assign deliveries and track order statuses.</p>
+                    </a>
+                    <a href="contact.php" class="link-card">
+                        <i class="fas fa-envelope"></i>
+                        <h3>Contact Support</h3>
+                        <p>Reach out for any assistance or feedback.</p>
+                    </a>
+                </div>
             </div>
         </section>
     </section>

@@ -1,20 +1,31 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 require_once '../php/db.php';
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'manager') {
     $_SESSION['error'] = "You must be a manager to access this page.";
-    header("Location: ../../login.php");
+    header("Location: ../login.php");
     exit();
 }
 
-$post = null;
-if (isset($_GET['edit'])) {
-    $postId = $_GET['edit'];
-    $sql = "SELECT * FROM food_posts WHERE id = :id";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute(['id' => $postId]);
-    $post = $stmt->fetch(PDO::FETCH_ASSOC);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $message = trim($_POST['message']);
+
+    if (empty($name) || empty($email) || empty($message)) {
+        $_SESSION['error'] = "All fields are required.";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $_SESSION['error'] = "Invalid email format.";
+    } else {
+        // In a real application, you would save the message to a database or send an email
+        $_SESSION['status'] = ['type' => 'success', 'msg' => 'Your message has been sent successfully!'];
+        header("Location: contact.php");
+        exit();
+    }
 }
 ?>
 
@@ -23,7 +34,7 @@ if (isset($_GET['edit'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $post ? 'Edit Food Post' : 'Create Food Post'; ?></title>
+    <title>Contact - Campus Bites</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     <style>
@@ -35,7 +46,8 @@ if (isset($_GET['edit'])) {
             --dark-brown: #8b3a0e;
             --black: #121212;
             --white: #ffffff;
-            --container-width: 1200px;
+            --light-cream: #e6d4b5;
+            --container-width: 600px;
         }
 
         * {
@@ -115,7 +127,7 @@ if (isset($_GET['edit'])) {
             cursor: pointer;
         }
 
-        .form-section {
+        .contact-section {
             flex: 1;
             display: flex;
             justify-content: center;
@@ -123,12 +135,12 @@ if (isset($_GET['edit'])) {
             padding: 2rem;
         }
 
-        .form-container {
+        .contact-container {
             background: var(--brown);
             padding: 2rem;
             border-radius: 15px;
             width: 100%;
-            max-width: 600px;
+            max-width: var(--container-width);
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
             animation: fadeIn 0.5s ease-in;
         }
@@ -138,7 +150,7 @@ if (isset($_GET['edit'])) {
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .form-title {
+        .contact-title {
             font-size: 2rem;
             font-weight: 700;
             color: var(--cream);
@@ -178,24 +190,7 @@ if (isset($_GET['edit'])) {
 
         .form-group textarea {
             resize: vertical;
-            min-height: 100px;
-        }
-
-        .form-group input[type="file"] {
-            padding: 0.2rem;
-            background: none;
-            border: none;
-        }
-
-        .form-group .current-image {
-            margin-top: 0.5rem;
-            color: var(--cream);
-        }
-
-        .form-group .current-image img {
-            max-width: 100px;
-            border-radius: 8px;
-            margin-top: 0.5rem;
+            min-height: 120px;
         }
 
         .submit-btn {
@@ -233,7 +228,7 @@ if (isset($_GET['edit'])) {
             color: #155724;
         }
 
-        .alert-error {
+        .alert-danger {
             background: #f8d7da;
             color: #721c24;
         }
@@ -299,19 +294,12 @@ if (isset($_GET['edit'])) {
 
         /* Responsive Design */
         @media (max-width: 1024px) {
-            .form-container {
+            .contact-container {
                 padding: 1.5rem;
-                max-width: 500px;
             }
 
-            .form-title {
+            .contact-title {
                 font-size: 1.75rem;
-            }
-
-            .form-group label,
-            .form-group input,
-            .form-group textarea {
-                font-size: 0.95rem;
             }
         }
 
@@ -344,16 +332,15 @@ if (isset($_GET['edit'])) {
                 to { opacity: 1; transform: translateY(0); }
             }
 
-            .form-section {
+            .contact-section {
                 padding: 1rem;
             }
 
-            .form-container {
+            .contact-container {
                 width: 95%;
-                padding: 1.5rem;
             }
 
-            .form-title {
+            .contact-title {
                 font-size: 1.5rem;
             }
 
@@ -361,11 +348,6 @@ if (isset($_GET['edit'])) {
             .form-group input,
             .form-group textarea {
                 font-size: 0.9rem;
-            }
-
-            .submit-btn {
-                font-size: 1rem;
-                padding: 0.75rem;
             }
         }
 
@@ -379,11 +361,11 @@ if (isset($_GET['edit'])) {
                 padding: 0.5rem;
             }
 
-            .form-container {
+            .contact-container {
                 padding: 1rem;
             }
 
-            .form-title {
+            .contact-title {
                 font-size: 1.25rem;
             }
 
@@ -393,12 +375,8 @@ if (isset($_GET['edit'])) {
                 font-size: 0.85rem;
             }
 
-            .form-group .current-image img {
-                max-width: 80px;
-            }
-
             .submit-btn {
-                font-size: 0.9rem;
+                font-size: 1rem;
                 padding: 0.75rem;
             }
 
@@ -427,15 +405,15 @@ if (isset($_GET['edit'])) {
                 </div>
                 <i class="fas fa-bars hamburger" id="hamburger"></i>
                 <div class="nav-elements" id="nav-elements">
-                    <a href="./home.php">Home</a>
-                    <a href="./food_post.php" class="active">Manage Food</a>
-                    <a href="./manager_order.php">Orders</a>
-                    <a href="../managers/contact.php">Contact</a>
+                    <a href="../managers/home.php">Home</a>
+                    <a href="../managers/food_post.php">Manage Food</a>
+                    <a href="../managers/manager_order.php">Orders</a>
+                    <a href="contact.php" class="active">Contact</a>
                 </div>
             </nav>
         </header>
-        <section class="form-section">
-            <div class="form-container">
+        <section class="contact-section">
+            <div class="contact-container">
                 <?php if (!empty($_SESSION['status'])): ?>
                     <div class="alert alert-<?php echo htmlspecialchars($_SESSION['status']['type']); ?>">
                         <i class="fas fa-<?php echo $_SESSION['status']['type'] === 'success' ? 'check-circle' : 'exclamation-circle'; ?>"></i>
@@ -450,34 +428,21 @@ if (isset($_GET['edit'])) {
                         </div>
                     </div>
                 <?php unset($_SESSION['error']); endif; ?>
-                <h1 class="form-title"><?php echo $post ? 'Edit Food Post' : 'Create Food Post'; ?></h1>
-                <form action="../php/food_posts.php" method="POST" enctype="multipart/form-data">
-                    <?php if ($post): ?>
-                        <input type="hidden" name="post_id" value="<?php echo htmlspecialchars($post['id']); ?>">
-                    <?php endif; ?>
+                <h1 class="contact-title">Contact Us</h1>
+                <form method="POST" action="">
                     <div class="form-group">
-                        <label for="title">Title</label>
-                        <input type="text" id="title" name="title" value="<?php echo $post ? htmlspecialchars($post['title']) : ''; ?>" required>
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" placeholder="Enter your name" required>
                     </div>
                     <div class="form-group">
-                        <label for="description">Description</label>
-                        <textarea id="description" name="description" rows="4"><?php echo $post ? htmlspecialchars($post['description']) : ''; ?></textarea>
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
                     </div>
                     <div class="form-group">
-                        <label for="price">Price (ብር)</label>
-                        <input type="number" id="price" name="price" step="0.01" min="0" value="<?php echo $post ? htmlspecialchars($post['price']) : ''; ?>" required>
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" rows="5" placeholder="Enter your message" required></textarea>
                     </div>
-                    <div class="form-group">
-                        <label for="image">Image</label>
-                        <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/gif" <?php echo $post ? '' : 'required'; ?>>
-                        <?php if ($post && $post['image_path']): ?>
-                            <div class="current-image">
-                                <p>Current Image:</p>
-                                <img src="/CAMPUS_BITES_WEB_APP/<?php echo htmlspecialchars($post['image_path']); ?>" alt="Current Image">
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                    <button type="submit" class="submit-btn"><?php echo $post ? 'Update Post' : 'Create Post'; ?></button>
+                    <button type="submit" class="submit-btn">Send Message</button>
                 </form>
             </div>
         </section>
