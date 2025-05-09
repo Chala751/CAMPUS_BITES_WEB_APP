@@ -2,32 +2,46 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Order Food</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Food - CampusBite</title>
   <link rel="stylesheet" href="order.css">
-  <link rel="stylesheet" href="../nav.css">
-  <script src="./order.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
-    
-    <header>
-      <nav class="navbar">
-        <div class="logo-container">
-          <img src="../images/icon.png" alt="Campus Bite Logo" class="logo">
-          <h1 class="brand-name">Campus<span>Bite</span></h1>
-        </div>
-        <div class="nav-links">
-          <a href="../index.html">Home</a>
-          <a href="./order.html" class="active">Order</a>
-          <a href="../about/about.html">About Us</a>
-        </div>
-        <div class="nav-actions">
-          <a href="./order.html" class="order-btn">Order Now</a>
-        </div>
-      </nav>
-    </header>
-  
-    
+    <section class="section-0">
+        <header>
+            <nav class="navbar">
+                <div class="logo-container">
+                    <img src="../images/icon.png" alt="Campus Bite Logo" class="logo1">
+                    <h1 class="brand-name">Campus<span>Bite</span></h1>
+                </div>
+                <div class="nav-elements">
+                    <ul>
+                        <li><a href="../index.html">Home</a></li>
+                        <li><a href="./order.html" class="active">Order</a></li>
+                        <li><a href="../about/about.html">About Us</a></li>
+                    </ul>
+                    <a href="../signup.php" class="sign-log" aria-label="User Account">
+                        <img src="../home/images/user (2).png" alt="User Icon">
+                    </a>
+                </div>
+                <button class="mobile-menu-btn" aria-label="Toggle Menu">
+                    <i class="fas fa-bars menu-icon"></i>
+                    <i class="fas fa-times close-icon"></i>
+                </button>
+            </nav>
+            <div class="mobile-menu">
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="./order.html" class="active">Order</a></li>
+                    <li><a href="../about/about.html">About Us</a></li>
+                    <li><a href="../signup.php">Sign Up</a></li>
+                </ul>
+            </div>
+            <div class="mobile-menu-overlay"></div>
+        </header>
+    </section>
+
     <section class="hero">
       <div class="hero-content">
         <h1>Hungry? We've Got You Covered!</h1>
@@ -38,8 +52,7 @@
         </div>
       </div>
     </section>
-  
-    
+
     <section class="features">
       <div class="section-title">
         <h2>Why Choose Campus Bite?</h2>
@@ -68,8 +81,7 @@
         </div>
       </div>
     </section>
-  
-    
+
     <section class="menu">
       <div class="menu-container">
         <div class="section-title">
@@ -84,7 +96,6 @@
           <button class="category-btn">Drinks</button>
         </div>
         <div class="food-grid">
-          
           <div class="food-card">
             <img src="https://images.unsplash.com/photo-1559847844-5315695dadae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1398&q=80" alt="Burger Meal" class="food-img">
             <div class="food-info">
@@ -96,8 +107,6 @@
               </div>
             </div>
           </div>
-          
-          
           <div class="food-card">
             <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Salad" class="food-img">
             <div class="food-info">
@@ -109,8 +118,6 @@
               </div>
             </div>
           </div>
-          
-          
           <div class="food-card">
             <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1381&q=80" alt="Pizza" class="food-img">
             <div class="food-info">
@@ -122,8 +129,6 @@
               </div>
             </div>
           </div>
-          
-          
           <div class="food-card">
             <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1480&q=80" alt="Pasta" class="food-img">
             <div class="food-info">
@@ -135,8 +140,6 @@
               </div>
             </div>
           </div>
-          
-          
           <div class="food-card">
             <img src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1527&q=80" alt="Donuts" class="food-img">
             <div class="food-info">
@@ -148,8 +151,6 @@
               </div>
             </div>
           </div>
-          
-          
           <div class="food-card">
             <img src="https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1374&q=80" alt="Smoothie" class="food-img">
             <div class="food-info">
@@ -164,49 +165,43 @@
         </div>
       </div>
     </section>
-  
-    
+
     <section class="testimonials">
       <div class="testimonials-container">
         <div class="section-title">
           <h2>What Students Say</h2>
         </div>
         <div class="testimonial-grid">
-
           <div class="testimonial-card">
             <div class="testimonial-text">
               <p>Campus Bite saved me during finals week! I didn't have time to leave the library, and they delivered right to my study spot. The food was fresh and arrived super fast.</p>
             </div>
             <div class="testimonial-author">
-              <img src="./images/user (1).png" alt="Sarah J." class="author-img">
+              <img src="./images/user (1).png" alt="Hana Tefera" class="author-img">
               <div class="author-info">
                 <h4>Hana Tefera</h4>
                 <p>Applied Biology</p>
               </div>
             </div>
           </div>
-          
-          
           <div class="testimonial-card">
             <div class="testimonial-text">
               <p>As an international student, I really appreciate that they offer food from my home country. It's authentic and reminds me of home when I'm feeling homesick.</p>
             </div>
             <div class="testimonial-author">
-              <img src="./images/user (1).png" alt="David K." class="author-img">
+              <img src="./images/user (1).png" alt="Robel Mulatu" class="author-img">
               <div class="author-info">
                 <h4>Robel Mulatu</h4>
                 <p>Electronics and Communication Eng.</p>
               </div>
             </div>
           </div>
-          
-         
           <div class="testimonial-card">
             <div class="testimonial-text">
               <p>The late-night delivery option is a game-changer! When I'm pulling an all-nighter, I can count on Campus Bite to keep me fueled with great food at reasonable prices.</p>
             </div>
             <div class="testimonial-author">
-              <img src="./images/user (1).png" alt="Emily R." class="author-img">
+              <img src="./images/user (1).png" alt="Biniam Mulat" class="author-img">
               <div class="author-info">
                 <h4>Biniam Mulat</h4>
                 <p>Software Engineering</p>
@@ -216,8 +211,7 @@
         </div>
       </div>
     </section>
-  
-    
+
     <footer>
       <div class="footer-container">
         <div class="footer-about">
@@ -236,7 +230,7 @@
         <div class="footer-links">
           <h3>Quick Links</h3>
           <ul>
-            <li><a href="../home/home.html">Home</a></li>
+            <li><a href="../index.html">Home</a></li>
             <li><a href="./order.html">Order Now</a></li>
             <li><a href="../about/about.html">About Us</a></li>
             <li><a href="#">FAQs</a></li>
@@ -261,8 +255,9 @@
         </div>
       </div>
       <div class="copyright">
-        <p>&copy; 2025 Campus Bite. All rights reserved.</p>
+        <p>© 2025 Campus Bite. All rights reserved.</p>
       </div>
     </footer>
-  </body>
+    <script src="./order.js"></script>
+</body>
 </html>
